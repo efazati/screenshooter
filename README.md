@@ -32,6 +32,21 @@ Go to directory and just use like this
 python threaded_capture.py
 ```
 
+also you can develop with screencapture
+
+```
+from Queue import Queue
+from threaded_capture import Screenshooter
+
+def download_websites():
+    q = Queue()
+    q.put('http://bab.ir')
+    q.put('http://cvas.ir')
+    q.put('http://efazati.org')
+    screen = Screenshooter(q)
+    q.join()
+
+```
 # 
 
 

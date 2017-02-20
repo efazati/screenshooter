@@ -2,17 +2,13 @@ import threading
 import time
 from Queue import Queue
 from selenium import webdriver
-import StringIO
 import contextlib
-from PIL import Image
-import signal
 import logging
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG,
                     format='[%(asctime)s %(threadName)s] %(message)s',
                     datefmt='%H:%M:%S')
-
-q = Queue()
 
 class Screenshooter(object):
     """ Threading example class
@@ -20,14 +16,16 @@ class Screenshooter(object):
     until the application exits.
     """
 
-    def __init__(self, urls, interval=1):
+    def __init__(self, q, interval=1):
         """ Constructor
         :type interval: int
         :param interval: Check interval, in seconds
+        :type q: Queue
+        :param q: queue of urls
         """
         self.interval = interval
         self.driver_obj = webdriver.PhantomJS
-        self.urls = urls
+        self.q = q
         self.run()
 
     @contextlib.contextmanager
@@ -48,9 +46,6 @@ class Screenshooter(object):
         logger.info('Download %s as %s' % (url, path))
         driver.set_window_size(1920, 1080) # optional
         driver.save_screenshot(path)
-        # screen = driver.get_screenshot_as_png() 
-        # im = Image.open(StringIO.StringIO(screen))
-        # im.save('screen_lores.jpg', 'JPEG', optimize=True, quality=95)
         return
 
     def runner(self, url):
@@ -61,13 +56,12 @@ class Screenshooter(object):
         logger.info("Finished Time %s: %.3f" % (url, t))
         time.sleep(self.interval)
 
-
     def worker(self):
         while True:
-            item = q.get()
+            item = self.q.get()
             logger.info("Process %s" % (item))
             self.runner(item)
-            q.task_done()
+            self.q.task_done()
 
     def run(self):
         """ Method that runs for range """
@@ -77,9 +71,7 @@ class Screenshooter(object):
             thread.start()                                  # Start the execution
 
 if __name__ == '__main__':
-    urls = []
-    for item in range(13951202000207, 13951202000218):
-        q.put('http://www.farsnews.com/newstext.php?nn=%s' % item)
-    screen = Screenshooter(urls)
-    signal.pause()
+    q = Queue()
+    q.put('http://cvas.ir')
+    screen = Screenshooter(q)
     q.join()
