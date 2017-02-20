@@ -10,3 +10,5 @@ def download_fars_news():
 
 if __name__ == '__main__':
     download_fars_news()
+    signal.pause()
+    

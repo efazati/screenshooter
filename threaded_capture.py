@@ -76,3 +76,4 @@ if __name__ == '__main__':
     q.put('http://cvas.ir')
     screen = Screenshooter(q)
     q.join()
+    signal.pause()
