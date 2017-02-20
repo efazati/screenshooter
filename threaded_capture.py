@@ -1,4 +1,5 @@
 import threading
+import signal
 import time
 from Queue import Queue
 from selenium import webdriver
