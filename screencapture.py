@@ -2,7 +2,7 @@
 from selenium import webdriver
 import StringIO
 import contextlib
-from PIL import Image
+# from PIL import Image
 import time
 # export PATH=$PATH:/var/lib/geckodriver
 @contextlib.contextmanager
