@@ -4,6 +4,7 @@ from selenium import webdriver
 import StringIO
 import contextlib
 from PIL import Image
+import signal
 
 class Screenshooter(object):
     """ Threading example class
@@ -18,13 +19,15 @@ class Screenshooter(object):
         """
         self.interval = interval
         self.driver_obj = webdriver.PhantomJS
+        self.run()
 
     @contextlib.contextmanager
-    def quitting(thing):
-        yield thing
-        thing.quit()
+    def quitting(self, driver):
+        yield driver
+        driver.service.process.send_signal(signal.SIGTERM) 
+        driver.quit()
 
-    def image_name(url):
+    def image_name(self, url):
         name = url.split("//")[-1].split("/")[0]
         name += '_%s.png' % time.time()
         return name
@@ -33,6 +36,7 @@ class Screenshooter(object):
         driver.implicitly_wait(10)
         driver.get(url)
         path = self.image_name(url)
+        print 'Download %s as %s' % (url, path)
         driver.set_window_size(1920, 1080) # optional
         driver.save_screenshot(path)
         # screen = driver.get_screenshot_as_png() 
@@ -46,20 +50,18 @@ class Screenshooter(object):
             self.save_image(driver, url)
             t = time.time() - startTime
         print "%s: %.3f" % (url, t)
+        time.sleep(self.interval)
 
 
     def run(self):
-        """ Method that runs forever """
-        for item in range(13951202000207, 13951202000217):
+        """ Method that runs for range """
+        for item in range(13951202000207, 13951202000218):
             url = "http://www.farsnews.com/newstext.php?nn=%s" % item
-            thread = threading.Thread(target=self.runner, args=(url))
+            print 'Generate', url
+            thread = threading.Thread(target=self.runner, args=(url,))
             thread.daemon = True                            # Daemonize thread
             thread.start()                                  # Start the execution
 
-            time.sleep(self.interval)
-
-screen = Screenshooter()
-time.sleep(3)
-print('Checkpoint')
-time.sleep(2)
-print('Bye')
+if __name__ == '__main__':
+    screen = Screenshooter()
+    signal.pause()
